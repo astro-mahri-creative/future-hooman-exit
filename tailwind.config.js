@@ -1,9 +1,21 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'phax-purple': '#8A72C0',
+        'phax-cyan': '#A3E3EC',
+        'phax-pink': '#FF3F8C',
+        'phax-dark': '#2F2545',
+      },
+      fontFamily: {
+        'orbitron': ['Orbitron', 'monospace'],
+      }
+    },
   },
   plugins: [],
 }
-

@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import AdminPanel from './components/AdminPanel';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState('login');
+
+  // Admin access (Ctrl+Shift+A)
+  React.useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        const password = prompt('Enter admin password:');
+        if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
+          setShowAdmin(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-phax-dark text-phax-cyan font-orbitron">
+      <div className="container mx-auto p-4">
+        <h1 className="text-4xl font-bold text-center mb-8">
+          FUTURE HOOMAN EXIT TERMINAL
+        </h1>
+        
+        {/* Main interface will go here */}
+        <div className="text-center text-phax-purple">
+          Interface components will be implemented next...
+          <br />
+          <span className="text-sm">Press Ctrl+Shift+A for admin panel</span>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+      <AdminPanel 
+        isVisible={showAdmin} 
+        onClose={() => setShowAdmin(false)} 
+      />
+    </div>
+  );
 }
 
-export default App
+export default App;
