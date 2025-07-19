@@ -43,3 +43,5 @@ export class PopulationScaleManager {
     };
   }
 }
+
+export const populationManager = new PopulationScaleManager();

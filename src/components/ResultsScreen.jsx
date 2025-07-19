@@ -1,10 +1,40 @@
 import React from 'react';
 import { isFHEELSCode } from '../utils/codeSystem';
 import { populationManager } from '../utils/populationScaling';
+import { universe, DIMENSIONAL_STATES } from '../utils/dimensionalStates';
 
 const ResultsScreen = ({ code, codeData, onContinue }) => {
+  // Defensive checks and logging
+  if (!codeData) {
+    console.error('codeData is undefined or null:', codeData);
+    return (
+      <div className="min-h-screen bg-phax-dark text-phax-pink p-4">
+        <h1>Submission Error</h1>
+        <pre>Code data is missing. Please try again or contact support.</pre>
+        <button onClick={onContinue} className="mt-4 bg-phax-pink text-phax-dark font-bold py-2 px-4">Continue</button>
+      </div>
+    );
+  }
+
   const isFheels = isFHEELSCode(code);
-  const scaledImpact = populationManager.applyScale(codeData.effect);
+  const effect = typeof codeData.effect === 'number' ? codeData.effect : 0;
+  if (typeof codeData.effect !== 'number') {
+    console.warn('codeData.effect is not a number:', codeData.effect);
+  }
+  const scaledImpact = populationManager.applyScale(effect);
+
+  let dimensionalImpact = {};
+  try {
+    dimensionalImpact = universe.applyCodeImpact(code, scaledImpact) || {};
+  } catch (e) {
+    console.error('Error applying code impact:', e);
+    dimensionalImpact = {};
+  }
+
+  // Defensive rendering for dimension states
+  const getStateColor = (state) => {
+    return DIMENSIONAL_STATES[state]?.color || '#888';
+  };
 
   return (
     <div className={`phax-window max-w-4xl mx-auto ${isFheels ? 'border-phax-pink' : 'border-phax-purple'}`}>
@@ -80,22 +110,23 @@ const ResultsScreen = ({ code, codeData, onContinue }) => {
 
         {/* Impact Analysis */}
         <div className="bg-phax-purple p-6 mb-6 text-phax-dark">
-          <div className="text-center font-bold mb-4">DIMENSIONAL IMPACT MATRIX</div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            {['PRIME', 'ALPHA', 'BETA'].map((dim, i) => (
-              <div key={dim} className={`bg-phax-cyan p-4 border-2 border-phax-dark text-center ${isFheels ? 'bg-opacity-80' : ''}`}>
-                <div className="font-bold text-sm mb-2">EARTH-{dim}</div>
-                <div className="text-2xl font-bold mb-1">
-                  {scaledImpact > 0 ? '+' : ''}{Math.round(scaledImpact + (i * 150))}
-                </div>
-                <div className="text-xs">
-                  {isFheels ? 'RESISTANCE UNITS' : 'EFFICIENCY UNITS'}
-                </div>
-              </div>
-            ))}
-          </div>
+  <div className="text-center font-bold mb-4">DIMENSIONAL IMPACT MATRIX</div>
+  
+  <div className="grid grid-cols-3 gap-4">
+    {Object.entries(dimensionalImpact).map(([dimId, dimData]) => (
+      <div key={dimId} className={`bg-phax-cyan p-4 border-2 border-phax-dark text-center ${isFheels ? 'bg-opacity-80' : ''}`}>
+        <div className="font-bold text-sm mb-2">{dimId}</div>
+        <div className="text-2xl font-bold mb-1">
+          {dimData?.ifluCount !== undefined ? dimData.ifluCount.toLocaleString() : 'N/A'}
         </div>
+        <div className="text-xs">iFLU CASES</div>
+        <div className="text-xs mt-1 font-semibold" style={{ color: getStateColor(dimData?.state) }}>
+          {dimData?.state || 'UNKNOWN'}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
 
         {/* Session Summary */}
         <div className="bg-phax-dark border-2 border-phax-cyan p-6 mb-6 text-phax-cyan">

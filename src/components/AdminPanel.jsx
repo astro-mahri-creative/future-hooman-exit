@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Users, Database, AlertTriangle } from 'lucide-react';
+import { getCodeStats, getAllDiscoveryStats, getCodeSuggestions } from '../utils/codeSystem';
 import { populationManager } from '../utils/populationScaling';
 
 const AdminPanel = ({ isVisible, onClose }) => {
@@ -92,6 +93,52 @@ const AdminPanel = ({ isVisible, onClose }) => {
             Update Population Scale
           </button>
         </div>
+
+        {/* Code Discovery Statistics */}
+<div className="bg-phax-cyan p-4 mb-4 text-phax-dark">
+  <h3 className="font-bold mb-3 flex items-center gap-2">
+    <Database size={20} />
+    Code Discovery Statistics
+  </h3>
+  
+  {(() => {
+    const codeStats = getCodeStats();
+    const discoveryStats = getAllDiscoveryStats();
+    
+    return (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div className="font-bold">Total Codes: {codeStats.total}</div>
+            <div>Discovered: {discoveryStats.discovered} ({discoveryStats.percentage}%)</div>
+          </div>
+          <div>
+            <div className="font-bold">By Organization:</div>
+            <div>FHEELS: {codeStats.fheelsCount} | PHAX: {codeStats.phaxCount}</div>
+          </div>
+        </div>
+        
+        <div>
+          <div className="font-bold text-sm mb-1">Codes by Tier:</div>
+          <div className="text-xs grid grid-cols-6 gap-1">
+            {Object.entries(codeStats.byTier).map(([tier, count]) => (
+              <div key={tier}>T{tier}: {count}</div>
+            ))}
+          </div>
+        </div>
+        
+        {discoveryStats.recentDiscoveries.length > 0 && (
+          <div>
+            <div className="font-bold text-sm mb-1">Recent Discoveries:</div>
+            <div className="text-xs">
+              {discoveryStats.recentDiscoveries.slice(0, 3).join(', ')}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  })()}
+</div>
 
         {/* Quick Stats */}
         <div className="bg-phax-cyan p-4 text-phax-dark">

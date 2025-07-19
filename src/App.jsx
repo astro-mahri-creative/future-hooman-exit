@@ -11,6 +11,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [lastSubmission, setLastSubmission] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [error, setError] = useState(null);
   const { canSubmit, recordSubmission } = useDeviceFingerprint();
 
   // Admin access (Ctrl+Shift+A)
@@ -47,35 +48,54 @@ function App() {
     setCurrentScreen('terminal');
   };
 
-  return (
-    <div className="min-h-screen bg-phax-dark text-phax-cyan font-orbitron">
-      <div className="container mx-auto p-4">
-        {currentScreen === 'login' && (
-          <LoginScreen onLogin={handleLogin} />
-        )}
-        
-        {currentScreen === 'terminal' && user && (
-          <TerminalScreen 
-            user={user} 
-            onCodeSubmit={handleCodeSubmit}
-          />
-        )}
-        
-        {currentScreen === 'results' && lastSubmission && (
-          <ResultsScreen 
-            code={lastSubmission.code}
-            codeData={lastSubmission.codeData}
-            onContinue={handleContinue}
-          />
-        )}
-      </div>
+  useEffect(() => {
+    console.log("Current screen:", currentScreen);
+  }, [currentScreen]);
 
-      <AdminPanel 
-        isVisible={showAdmin} 
-        onClose={() => setShowAdmin(false)} 
-      />
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="min-h-screen bg-phax-dark text-phax-cyan p-4">
+        <h1>Something went wrong</h1>
+        <pre>{error.message}</pre>
+      </div>
+    );
+  }
+
+  try {
+    return (
+      <div className="min-h-screen bg-phax-dark text-phax-cyan font-orbitron">
+        <div className="container mx-auto p-4">
+          {currentScreen === 'login' && (
+            <LoginScreen onLogin={handleLogin} />
+          )}
+          
+          {currentScreen === 'terminal' && user && (
+            <TerminalScreen 
+              user={user} 
+              onCodeSubmit={handleCodeSubmit}
+            />
+          )}
+          
+          {currentScreen === 'results' && lastSubmission && (
+            <ResultsScreen 
+              code={lastSubmission.code}
+              codeData={lastSubmission.codeData}
+              onContinue={handleContinue}
+            />
+          )}
+        </div>
+
+        <AdminPanel 
+          isVisible={showAdmin} 
+          onClose={() => setShowAdmin(false)} 
+        />
+      </div>
+    );
+  } catch (err) {
+    console.error("Error in App:", err);
+    setError(err);
+    return null;
+  }
 }
 
 export default App;

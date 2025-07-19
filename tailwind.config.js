@@ -7,15 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        'phax-dark': '#2F2545',
         'phax-purple': '#8A72C0',
         'phax-cyan': '#A3E3EC',
-        'phax-pink': '#FF3F8C',
-        'phax-dark': '#2F2545',
+        'phax-pink': '#FF3F8C'
       },
       fontFamily: {
-        'orbitron': ['Orbitron', 'monospace'],
+        'orbitron': ['Orbitron', 'sans-serif']
       }
-    },
-  },
-  plugins: [],
+    }
+  }
 }

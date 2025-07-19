@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { validateCode, isFHEELSCode } from '../utils/codeSystem';
+import { validateCode, isFHEELSCode, trackCodeDiscovery } from '../utils/codeSystem';
 import { populationManager } from '../utils/populationScaling';
 
 const TerminalScreen = ({ user, onCodeSubmit }) => {
@@ -8,32 +8,50 @@ const TerminalScreen = ({ user, onCodeSubmit }) => {
   const [progress, setProgress] = useState(0);
   const [systemCompromised, setSystemCompromised] = useState(false);
 
+
+  const [pendingCodeData, setPendingCodeData] = useState(null);
+
   const handleCodeSubmit = () => {
     const codeData = validateCode(code);
     if (!codeData) return;
 
+    // Track the discovery
+    trackCodeDiscovery(code, user.username);
+
+    setPendingCodeData(codeData);
     setProcessing(true);
     setProgress(0);
-    
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setProcessing(false);
-          
-          const isFheels = isFHEELSCode(code);
-          if (isFheels) {
-            setSystemCompromised(true);
-            setTimeout(() => setSystemCompromised(false), 4000);
-          }
-          
-          onCodeSubmit(code, codeData);
-          return 100;
-        }
-        return prev + 8;
-      });
-    }, 150);
   };
+
+  // Progress animation effect
+  React.useEffect(() => {
+    if (processing) {
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setProcessing(false);
+            return 100;
+          }
+          return prev + 8;
+        });
+      }, 150);
+      return () => clearInterval(interval);
+    }
+  }, [processing]);
+
+  // Effect to handle code submission and system compromise after progress completes
+  React.useEffect(() => {
+    if (progress === 100 && pendingCodeData) {
+      const isFheels = isFHEELSCode(code);
+      if (isFheels) {
+        setSystemCompromised(true);
+        setTimeout(() => setSystemCompromised(false), 4000);
+      }
+      onCodeSubmit(code, pendingCodeData);
+      setPendingCodeData(null);
+    }
+  }, [progress, pendingCodeData, code, onCodeSubmit]);
 
   return (
     <div className={`phax-window max-w-4xl mx-auto ${systemCompromised ? 'animate-pulse' : ''}`}>
