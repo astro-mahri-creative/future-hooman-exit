@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Users, Database, AlertTriangle } from 'lucide-react';
+import { populationManager } from '../utils/populationScaling';
 
 const AdminPanel = ({ isVisible, onClose }) => {
   const [currentScale, setCurrentScale] = useState(1.0);
   const [newScale, setNewScale] = useState(1.0);
   const [reason, setReason] = useState('');
   const [stats, setStats] = useState({
-    todayVisitors: 0,
-    totalSubmissions: 0,
-    avgImpact: 0
+    todayVisitors: 12,
+    totalSubmissions: 8,
+    avgImpact: 247
   });
+
+  useEffect(() => {
+    if (isVisible) {
+      const scaleInfo = populationManager.getCurrentScale();
+      setCurrentScale(scaleInfo.scale);
+      setNewScale(scaleInfo.scale);
+    }
+  }, [isVisible]);
 
   if (!isVisible) return null;
 
   const handleScaleUpdate = async () => {
-    // Will implement API call to update population scaling
-    console.log('Updating scale to:', newScale, 'Reason:', reason);
-    setCurrentScale(newScale);
-    setReason('');
+    const result = await populationManager.updateScale(newScale, reason);
+    if (result.success) {
+      setCurrentScale(newScale);
+      setReason('');
+      console.log('Scale updated successfully');
+    }
   };
 
   return (
