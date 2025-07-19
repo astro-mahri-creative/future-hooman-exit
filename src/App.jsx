@@ -9,7 +9,7 @@ function App() {
   // Admin access (Ctrl+Shift+A)
   React.useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+      if (e.ctrlKey && e.shiftKey && e.key === 'Z') {
         const password = prompt('Enter admin password:');
         if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
           setShowAdmin(true);
@@ -32,7 +32,7 @@ function App() {
         <div className="text-center text-phax-purple">
           Interface components will be implemented next...
           <br />
-          <span className="text-sm">Press Ctrl+Shift+A for admin panel</span>
+          <span className="text-sm">Press Ctrl+Shift+Z for admin panel</span>
         </div>
       </div>
 
